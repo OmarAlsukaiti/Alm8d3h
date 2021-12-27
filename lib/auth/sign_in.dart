@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class SignIn extends StatefulWidget {
   @override
@@ -112,7 +114,7 @@ class _SignInState extends State<SignIn> {
                     padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
                     color: Colors.redAccent,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)
+                        borderRadius: BorderRadius.circular(30)
                     ),
                     minWidth: 200,
                     onPressed: () {
@@ -171,6 +173,8 @@ class _SignInState extends State<SignIn> {
             .doc(auth.user!.uid)
             .get();
         if (userDoc.exists) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('email', 'useremail@gmail.com');
           Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (context) => Nav()));
         } else {

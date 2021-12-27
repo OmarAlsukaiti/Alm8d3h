@@ -2,6 +2,8 @@ import 'package:alm8d3h/auth/sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class Attendance extends StatefulWidget {
   const Attendance({Key? key}) : super(key: key);
@@ -30,6 +32,8 @@ class _AttendanceState extends State<Attendance> {
                   leading: IconButton(
                     onPressed: () async {
                       await FirebaseAuth.instance.signOut();
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      prefs.remove('email');
                       Navigator.of(context).pushReplacement(
                           MaterialPageRoute(builder: (context) => SignIn()));
                     },
