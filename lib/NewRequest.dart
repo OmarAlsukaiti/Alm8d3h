@@ -1,4 +1,5 @@
 import 'package:alm8d3h/auth/sign_in.dart';
+import 'package:alm8d3h/requests.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -30,9 +31,10 @@ class _NewRequestState extends State<NewRequest> {
             'Description': Description,
             'Created by': FirebaseAuth.instance.currentUser?.uid,
             'Time': Timestamp.now(),
+            'Completed by': null,
           });
       Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => NewRequest()));
+          MaterialPageRoute(builder: (context) => Requests()));
     }
   }
   Widget build(BuildContext context) {

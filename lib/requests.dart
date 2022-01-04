@@ -3,6 +3,7 @@ import 'package:alm8d3h/auth/sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Requests extends StatefulWidget {
   const Requests({Key? key}) : super(key: key);
@@ -30,8 +31,8 @@ class _RequestsState extends State<Requests> {
         body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
             stream: FirebaseFirestore.instance
                 .collection('Requests')
-                .orderBy('Time', descending: true)
                 .where('Status', isEqualTo: _state)
+                .orderBy('Time', descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData)
@@ -176,52 +177,76 @@ class _RequestsState extends State<Requests> {
           SizedBox(
             height: 25,
           ),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                isTaken = !isTaken;
-              });
-              if (isTaken) {
-                snapshot?.reference.update({"Status": 1});
-                snapshot?.reference
-                    .update({"Completed by": _auth.currentUser!.uid});
-              } else {
-                snapshot?.reference.update({"Status": 0});
-                snapshot?.reference.update({"Completed by": null});
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Container(
-                  height: 35,
-                  width: 35,
-                  decoration: BoxDecoration(
-                      color: snapshot!.get('Status') == 0
-                          ? Color(0xff3C7B48)
-                          : Color(0xff9F2222),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20.0),
-                        topRight: Radius.circular(20.0),
-                        bottomLeft: Radius.circular(20.0),
-                        bottomRight: Radius.circular(20.0),
-                      )),
-                  child: Center(
-                    child: Icon(
-                        snapshot!.get('Status') == 0
-                            ? Icons.check
-                            : Icons.close,
-                        color: Colors.white),
-                  ),
-                ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              snapshot!.get('Created by') == _auth.currentUser!.uid || snapshot!.get('Completed by') == _auth.currentUser!.uid?
+              IconButton(
+              icon: snapshot!.get('Status') == 0 ? Icon(Icons.delete, color: Colors.black54,) :
+                    Icon(Icons.done, color: Colors.black54,),
+              onPressed: () {
+                if(snapshot!.get('Status') == 1 && snapshot!.get('Completed by') == _auth.currentUser!.uid){
+                  snapshot?.reference.update({"Status": 2});
+                }else{
+                  Fluttertoast.showToast(msg: 'FUCK OFF');
+                }
+                if(snapshot!.get('Status') == 0 && snapshot!.get('Created by') == _auth.currentUser!.uid){
+                  snapshot?.reference.update({"Status": 3});
+                }else{
+                  Fluttertoast.showToast(msg: 'Sorry you are not responsible for this request');// جالس يعرض هالمسج دايم لان الاف ما تتحقق في حالة انه جعل الفعالية حالتها 2
+                }
+              },
+            ) : SizedBox(width: 39,),
+              GestureDetector(
+                onTap: () {
+                  if (snapshot!.get('Completed by') == null) {
+                    snapshot?.reference.update({"Status": 1});
+                    snapshot?.reference
+                        .update({"Completed by": _auth.currentUser!.uid});
+                  } else {
+                    if(snapshot!.get('Completed by') == _auth.currentUser!.uid){
+                      snapshot?.reference.update({"Status": 0});
+                      snapshot?.reference.update({"Completed by": null});
+                    } else {
+                      Fluttertoast.showToast(msg: 'Sorry you are not the owner of this request');
+                    }
+                  }
+                },
+                child: Row(
+                  children: [
+                    Container(
+                      height: 35,
+                      width: 35,
+                      decoration: BoxDecoration(
+                          color: snapshot!.get('Status') == 0
+                              ? Color(0xff3C7B48)
+                              : Color(0xff9F2222),
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(20.0),
+                            topRight: Radius.circular(20.0),
+                            bottomLeft: Radius.circular(20.0),
+                            bottomRight: Radius.circular(20.0),
+                          )),
+                      child: Center(
+                        child: Icon(
+                            snapshot!.get('Status') == 0
+                                ? Icons.check
+                                : Icons.close,
+                            color: Colors.white),
+                      ),
+                    ),
 
-                // if (snapshot.get("Completed by") != null)
-                //   Text(
-                //       '${FirebaseFirestore.instance.collection("users").doc(snapshot.get("Completed by")).get('name')}'
-                //   ),
-              ],
-            ),
+                    // if (snapshot.get("Completed by") != null)
+                    //   Text(
+                    //       '${FirebaseFirestore.instance.collection("users").doc(snapshot.get("Completed by")).get('name')}'
+                    //   ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 47,),
+            ],
           )
+
         ],
       ),
     );
